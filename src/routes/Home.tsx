@@ -3,7 +3,7 @@ import i18n from 'src/i18n'
 import { useContext, useState } from 'react'
 import { GameSelector } from '../components/GameSelector'
 import { Icon } from '../components/Icon'
-import { callRemote, selectGamePath, useBlockingMask } from '../utils'
+import { callRemote, selectGamePath } from '../utils'
 import {
   useAlwaysOnMods,
   useCurrentBlacklistProfile,
@@ -14,7 +14,7 @@ import {
   useUseMultiThread,
 } from '../states'
 import { useEffect } from 'react'
-import { Checkbox, Select, ListBox, Heading, Card, Button } from '@heroui/react'
+import { Checkbox, Select, ListBox, Heading, Card, Button, toast } from '@heroui/react'
 import { createPopup, PopupContext } from '../components/Popup'
 import { useGlobalContext } from 'src/App'
 
@@ -60,8 +60,6 @@ export const Home = () => {
     })()
   }, [st.ready])
 
-  const mask = useBlockingMask()
-
   useEffect(() => {
     if (!gamePath) return
     ;(async () => {
@@ -102,8 +100,8 @@ export const Home = () => {
         createPopup(() => {
           const { hide } = useContext(PopupContext)
           return (
-            <div className="popup-content">
-              <h2>{i18n.t('同步黑名单 Mod 列表')}</h2>
+            <div className="popup-content spacey">
+              <Heading level={5}>{i18n.t('同步黑名单 Mod 列表')}</Heading>
               <p>{i18n.t('当前的 blacklist.txt 与配置文件不同。您想要同步配置文件以匹配吗？')}</p>
               <p>
                 {`不同的 Mod: ${[
@@ -114,8 +112,9 @@ export const Home = () => {
                 ].join(', ')}`}
               </p>
               <p>{i18n.t('注意，该功能不支持通配符等')}</p>
-              <div className="buttons">
-                <button
+              <div className="space-x-2">
+                <Button
+                  variant="secondary"
                   onClick={async () => {
                     await callRemote(
                       'sync_blacklist_profile_from_file',
@@ -131,8 +130,10 @@ export const Home = () => {
                   }}
                 >
                   {i18n.t('同步')}
-                </button>
-                <button onClick={() => hide()}>{i18n.t('忽略')}</button>
+                </Button>
+                <Button variant="secondary" onClick={() => hide()}>
+                  {i18n.t('忽略')}
+                </Button>
               </div>
             </div>
           )
@@ -181,12 +182,8 @@ export const Home = () => {
               lastUseMap[currentProfileName] = Date.now()
               setLastUseMap(lastUseMap)
               st.save()
-              mask.setMaskEnabled(true)
-              mask.setMaskText(i18n.t('正在启动'))
+              toast.info(i18n.t('正在启动'))
               callRemote('start_game_directly', gamePath || gamePaths[0], v === 'origin')
-              setTimeout(() => {
-                mask.setMaskEnabled(false)
-              }, 20000)
             }}
           />
         ) : (
@@ -275,18 +272,16 @@ export const Home = () => {
                 variant="secondary"
                 size="sm"
                 className="mt-2"
-                onPress={(e: any) => {
+                onClick={(e: any) => {
                   e.stopPropagation?.()
                   globalCtx.blacklist.switchProfile(v.name)
                   lastUseMap[v.name] = Date.now()
                   setLastUseMap(lastUseMap)
-                  mask.setMaskEnabled(true)
-                  mask.setMaskText(i18n.t('正在启动'))
+                  toast.info(i18n.t('正在启动'))
                   setTimeout(
                     () => callRemote('start_game_directly', gamePath || gamePaths[0], false),
                     300,
                   )
-                  setTimeout(() => mask.setMaskEnabled(false), 20000)
                 }}
               >
                 {i18n.t('启动')}
