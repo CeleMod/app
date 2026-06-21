@@ -18,7 +18,7 @@ import { useGlobalContext } from '../App'
 import { enforceEverest } from '../components/EnforceEverestPage'
 import { createPopup, PopupContext } from '../components/Popup'
 import { ProgressIndicator } from '../components/Progress'
-import { Checkbox, Heading, Input } from '@heroui/react'
+import { Card, Checkbox, Heading, Input } from '@heroui/react'
 
 type DepState = 'resolved' | 'missing' | 'not-enabled' | 'mismatched-version'
 
@@ -274,7 +274,8 @@ const ModLocal = ({
           onClick={() => {
             ctx?.switchMod(name, !enabled)
           }}
-          onContextMenu={() => {
+          onContextMenu={(e) => {
+            e.preventDefault()
             ctx?.switchAlwaysOn(name, !isAlwaysOn)
           }}
         >
@@ -433,31 +434,39 @@ const Mod = (props: ModDepInfo & { renderPath?: string[] }) => {
   return <ModLocal {...props} />
 }
 
-const Profile = ({ name, current }: { name: string; current: boolean }) => {
+const Profile = ({
+  name,
+  current,
+  className,
+}: {
+  name: string
+  current: boolean
+  className?: string
+}) => {
   const ctx = useContext(modListContext)
 
   return (
-    <div
-      className={`profile ${current && 'current'}`}
+    <Card
+      className={`p-2 transition-colors ${current ? 'ring-2 ring-accent' : ''} ${className}`}
       onClick={() => {
         ctx?.switchProfile(name)
       }}
     >
-      <span>{name}</span>
-      <span className="opers">
-        {name !== 'Default' && (
-          <span
-            className="delete"
-            onClick={(e) => {
-              e.stopPropagation()
-              ctx?.removeProfile(name)
-            }}
-          >
-            <Icon name="delete" />
-          </span>
-        )}
-      </span>
-    </div>
+      <Card.Title className="text-sm font-semibold">{name}</Card.Title>
+      <Card.Footer>
+        <Button
+          size="sm"
+          isDisabled={name === 'Default'}
+          type="ghost"
+          onClick={(e: any) => {
+            e.stopPropagation?.()
+            ctx?.removeProfile(name)
+          }}
+        >
+          <Icon name="delete" />
+        </Button>
+      </Card.Footer>
+    </Card>
   )
 }
 
@@ -522,18 +531,15 @@ const ModOptionsOrderPanel = ({
 
   return (
     <div className="mod-options-order">
-      <div className="moo-header" onClick={() => setExpanded((v) => !v)}>
+      <div className="moo-header flex items-center" onClick={() => setExpanded((v) => !v)}>
         <Icon name={expanded ? 'i-down' : 'i-right'} />
         <span>{i18n.t('Mod Options 顺序')}</span>
       </div>
       {expanded && (
         <div className="moo-list">
           {allFiles.map((file, i) => (
-            <div className="moo-item" key={file}>
-              <span className="moo-name" title={file}>
-                {file}
-              </span>
-              <span className="moo-btns">
+            <div className="moo-item flex items-center gap-x-2" key={file}>
+              <span className="moo-btns inline-flex items-center gap-x-1">
                 <button
                   className={i === 0 ? 'disabled' : ''}
                   onClick={() => moveToTop(i)}
@@ -550,6 +556,10 @@ const ModOptionsOrderPanel = ({
                 >
                   ↓
                 </button>
+              </span>
+
+              <span className="moo-name" title={file}>
+                {file}
               </span>
             </div>
           ))}
@@ -897,8 +907,8 @@ export const Manage = () => {
           'switch_mod_blacklist_profile',
           gamePath,
           currentProfileName,
-          JSON.stringify(names),
-          JSON.stringify(files),
+          names,
+          files,
           enabled,
         )
 
@@ -1386,9 +1396,9 @@ export const Manage = () => {
               marginTop: '5px',
             }}
           >
-            <button onClick={startFullModCheck} disabled={fullCheckRunning}>
+            <Button onClick={startFullModCheck} isDisabled={fullCheckRunning}>
               {fullCheckRunning ? i18n.t('检查中...') : i18n.t('检查全部 Mod 是否正常')}
-            </button>
+            </Button>
             {showUpdate && hasUpdateMods.length !== 0 && (
               <button
                 onClick={() => {
@@ -1475,15 +1485,18 @@ export const Manage = () => {
             <div className="padding"></div>
           </div>
         </div>
-        <div className="profiles">
-          <div className="title">{i18n.t('Profile 列表')}</div>
-          {profiles.map((v) => (
-            <Profile {...v} current={v.name === currentProfileName} />
-          ))}
+
+        <div className="profiles mt-8 space-y-2">
+          <Heading level={1}>{i18n.t('Profile 列表')}</Heading>
+
+          <div className="flex gap-2 flex-wrap">
+            {profiles.map((v) => (
+              <Profile {...v} current={v.name === currentProfileName} className="w-24" />
+            ))}
+          </div>
 
           <div className="newProfile">
-            <input
-              type="text"
+            <Input
               placeholder={i18n.t('Profile 名')}
               /* @ts-ignore */
               filter={alphabet}
@@ -1503,18 +1516,20 @@ export const Manage = () => {
             </Button>
           </div>
 
-          <ModOptionsOrderPanel
-            gamePath={gamePath}
-            currentProfileName={currentProfileName}
-            currentProfile={currentProfile}
-            installedMods={installedMods}
-            onOrderChange={(newOrder) => {
-              if (currentProfile) {
-                currentProfile.mod_options_order = newOrder
-                setCurrentProfile({ ...currentProfile })
-              }
-            }}
-          />
+          <div className="mt-4">
+            <ModOptionsOrderPanel
+              gamePath={gamePath}
+              currentProfileName={currentProfileName}
+              currentProfile={currentProfile}
+              installedMods={installedMods}
+              onOrderChange={(newOrder) => {
+                if (currentProfile) {
+                  currentProfile.mod_options_order = newOrder
+                  setCurrentProfile({ ...currentProfile })
+                }
+              }}
+            />
+          </div>
         </div>
       </modListContext.Provider>
     </div>
