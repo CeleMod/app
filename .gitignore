@@ -2,3 +2,8 @@
 cele-mod.db
 mod-cache-*
 translate_script.js
+
+node_modules
+.DS_Store
+dist
+.vite

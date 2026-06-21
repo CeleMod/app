@@ -1,0 +1,21 @@
+{
+  "default": {
+    "identifier": "default",
+    "description": "Default capabilities for CeleMod",
+    "local": true,
+    "windows": ["main"],
+    "permissions": [
+      "core:default",
+      "store:default",
+      "dialog:default",
+      "shell:allow-open",
+      "os:default",
+      "fs:default",
+      "core:window:default",
+      "core:window:allow-set-size",
+      "core:window:allow-set-position",
+      "core:window:allow-center",
+      "core:event:default"
+    ]
+  }
+}

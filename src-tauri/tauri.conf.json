@@ -1,0 +1,47 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nicedoc/tauri/refs/heads/dev/crates/tauri-cli/schema.json",
+  "productName": "CeleMod",
+  "version": "1.0.0",
+  "identifier": "com.celemod.app",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "$HOME/.bun/bin/bun run dev",
+    "beforeBuildCommand": "$HOME/.bun/bin/bun run build"
+  },
+  "bundle": {
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "CeleMod",
+        "width": 800,
+        "height": 640,
+        "minWidth": 800,
+        "minHeight": 600,
+        "resizable": true,
+        "center": true,
+        "decorations": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "plugins": {
+    "store": null,
+    "shell": {
+      "open": true
+    },
+    "dialog": null,
+    "os": null,
+    "fs": null
+  }
+}
