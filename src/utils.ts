@@ -1,5 +1,3 @@
-import { useState } from 'react'
-import { useEffect } from 'react'
 import { invoke } from '@tauri-apps/api/core'
 import { listen, UnlistenFn } from '@tauri-apps/api/event'
 import { open } from '@tauri-apps/plugin-dialog'
@@ -115,36 +113,6 @@ export const getCelemodHash = async (): Promise<string> => {
 export const getCelemodUA = async (): Promise<string> => {
   const [version, hash] = await Promise.all([getCelemodVersion(), getCelemodHash()])
   return `CeleMod/${version}-${hash.substr(0, 6)}`
-}
-
-export const useBlockingMask = () => {
-  const [maskEnabled, setMaskEnabled] = useState(false)
-  const [maskText, setMaskText] = useState('')
-
-  let element = document.querySelector('.blocking-mask') as HTMLElement
-  if (!element) {
-    element = document.createElement('div')
-    element.className = 'blocking-mask'
-    document.body.appendChild(element)
-  }
-
-  useEffect(() => {
-    if (maskEnabled) {
-      element.style.display = 'block'
-      element.style.opacity = '1'
-      element.innerText = maskText
-    } else {
-      element.style.opacity = '0'
-      setTimeout(() => {
-        element.style.display = 'none'
-      }, 200)
-    }
-  }, [maskEnabled, maskText])
-
-  return {
-    setMaskEnabled,
-    setMaskText,
-  }
 }
 
 export class EventTarget {
