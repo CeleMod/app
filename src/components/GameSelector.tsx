@@ -4,6 +4,7 @@ import { Icon } from './Icon'
 import { callRemote } from '../utils'
 import { useGamePath } from 'src/states'
 import { Button, Heading, ListBox, Select } from '@heroui/react'
+import { LanuchButton } from './LaunchButton'
 
 export const GameSelector = (props: {
   paths: string[]
@@ -56,13 +57,19 @@ export const GameSelector = (props: {
       </div>
 
       <div className="flex items-center gap-x-1 mt-2">
-        <Button variant="secondary" onPress={() => props.launchGame('everest')}>
-          {i18n.t('Everest')}
-        </Button>
+        <LanuchButton
+          text={i18n.t('Everest')}
+          onClick={() => {
+            props.launchGame('everest')
+          }}
+        />
 
-        <Button variant="secondary" onPress={() => props.launchGame('origin')}>
-          {i18n.t('原版')}
-        </Button>
+        <LanuchButton
+          text={i18n.t('原版')}
+          onClick={() => {
+            props.launchGame('origin')
+          }}
+        />
 
         <Button
           variant="secondary"

@@ -14,9 +14,10 @@ import {
   useUseMultiThread,
 } from '../states'
 import { useEffect } from 'react'
-import { Checkbox, Select, ListBox, Heading, Card, Button, toast } from '@heroui/react'
+import { Checkbox, Select, ListBox, Heading, Card, Button } from '@heroui/react'
 import { createPopup, PopupContext } from '../components/Popup'
 import { useGlobalContext } from 'src/App'
+import { LanuchButton } from 'src/components/LaunchButton'
 
 export const Home = () => {
   const [gamePath, setGamePath] = useGamePath()
@@ -183,7 +184,6 @@ export const Home = () => {
               setLastUseMap(lastUseMap)
               st.set('lastUseMap', lastUseMap)
               st.save()
-              toast(i18n.t('正在启动'))
               callRemote('start_game_directly', gamePath || gamePaths[0], v === 'origin')
             }}
           />
@@ -269,26 +269,19 @@ export const Home = () => {
               <Card.Description className="text-xs text-muted">
                 {i18n.t('启用的 Mod 数')}: {installedMods.length - v.mods.length}
               </Card.Description>
-              <Button
-                variant="secondary"
-                size="sm"
+
+              <LanuchButton
                 className="mt-2"
-                onClick={(e: any) => {
+                onClick={(e) => {
                   e.stopPropagation?.()
                   globalCtx.blacklist.switchProfile(v.name)
                   lastUseMap[v.name] = Date.now()
                   setLastUseMap(lastUseMap)
                   st.set('lastUseMap', lastUseMap)
                   st.save()
-                  toast(i18n.t('正在启动'))
-                  setTimeout(
-                    () => callRemote('start_game_directly', gamePath || gamePaths[0], false),
-                    300,
-                  )
+                  callRemote('start_game_directly', gamePath || gamePaths[0], false)
                 }}
-              >
-                {i18n.t('启动')}
-              </Button>
+              />
             </Card>
           ))}
         </div>
