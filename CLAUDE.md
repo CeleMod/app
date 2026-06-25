@@ -55,7 +55,6 @@ celemod/
     index.tsx              # Entry point
     App.tsx                # MemoryRouter, GlobalContext, sidebar, Routes
     i18n.ts                # i18next config (6 locales, {key} interpolation)
-    env.ts                 # getPlatform() via @tauri-apps/plugin-os
     states.ts              # Zustand stores + @tauri-apps/plugin-store persistence
     utils.ts               # callRemote() → Tauri invoke(), event helpers
     api/                   # HTTP API clients (wegfan API)
