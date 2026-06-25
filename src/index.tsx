@@ -3,17 +3,7 @@ import App from './App'
 // @ts-ignore
 import './globals.css'
 
-function syncDarkMode() {
-  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-  document.documentElement.classList.toggle('dark', isDark)
-}
-
 async function init() {
-  syncDarkMode()
-
-  // Listen for system appearance changes
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncDarkMode)
-
   // F5 reload
   window.addEventListener('keyup', (evt) => {
     if (evt.code === 'F5') {
