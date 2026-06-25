@@ -13,13 +13,6 @@ export const _functionalMods = () =>
       visible: (lang) => lang === 'zh-CN',
     },
     {
-      name: i18n.t('CelesteNet'),
-      description: i18n.t('Multiplayer support'),
-      download_url: 'https://celeste.weg.fan/api/v2/download/mods/CelesteNet.Client',
-      visible: (lang) => lang !== 'zh-CN',
-      exclude_from_download_all: true,
-    },
-    {
       name: 'CelesteEmojis',
       description: i18n.t('为聊天框加入了更多可用的 Emoji'),
       download_url: 'https://celeste.weg.fan/api/v2/download/mods/CelesteEmojis',
