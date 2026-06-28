@@ -1,13 +1,14 @@
 import { Fragment } from 'react'
 import { useCurrentEverestVersion, useGamePath, useMirror } from '../states'
-import { useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { callRemote, displayDate } from '../utils'
 import { Icon } from '../components/Icon'
 import { Button } from '../components/Button'
 import { useGlobalContext } from '../App'
 import { ProgressIndicator } from '../components/Progress'
-import { createPopup, PopupContext } from '../components/Popup'
 import { useTranslation } from 'react-i18next'
+import { useAlert } from 'src/components/alert'
+import { Input } from '@heroui/react'
 
 interface Maddie480EverestVersion {
   date: string
@@ -134,41 +135,31 @@ export const Everest = () => {
       .then((v) => setEverestData(v))
   }, [])
 
-  const showManualVersionPopup = () => {
-    createPopup(() => {
-      const { hide } = useContext(PopupContext)
-      const [manualVersion, setManualVersion] = useState(currentEverestVersion || '')
-
-      return (
-        <div className="popup-content manual-everest-popup">
-          <div className="title">{t('手动指定 Everest 版本')}</div>
-          <div className="content">
-            <p>
-              {t('如果你已经安装了 Everest，但 CeleMod 没有正确识别，可以在这里手动填写版本号。')}
-            </p>
-            <p>{t('注意：如果实际上没有安装 Everest，就无法通过 Mod 方式启动游戏。')}</p>
-            <input
-              type="text"
-              value={manualVersion}
-              placeholder={t('例如 4000')}
-              onInput={(e) => setManualVersion((e.target as HTMLInputElement).value)}
-            />
-          </div>
-          <div className="buttons">
-            <Button onClick={hide}>{t('取消')}</Button>
-            <Button
-              onClick={() => {
-                const version = manualVersion.trim()
-                if (!version) return
-                setCurrentEverestVersion(version)
-                hide()
-              }}
-            >
-              {t('确认')}
-            </Button>
-          </div>
-        </div>
-      )
+  const alert = useAlert()
+  const [manualVersion, setManualVersion] = useState(currentEverestVersion || '')
+  const showManualVersionAlert = () => {
+    alert({
+      title: t('手动指定 Everest 版本'),
+      message: (
+        <>
+          <p>
+            {t('如果你已经安装了 Everest，但 CeleMod 没有正确识别，可以在这里手动填写版本号。')}
+          </p>
+          <p>{t('注意：如果实际上没有安装 Everest，就无法通过 Mod 方式启动游戏。')}</p>
+          <Input
+            value={manualVersion}
+            placeholder={t('例如 4000')}
+            onInput={(e) => setManualVersion((e.target as HTMLInputElement).value)}
+          />
+        </>
+      ),
+      cancelText: t('取消'),
+      okText: t('确认'),
+      onOk: async () => {
+        const version = manualVersion.trim()
+        if (!version) return
+        setCurrentEverestVersion(version)
+      },
     })
   }
 
@@ -190,7 +181,7 @@ export const Everest = () => {
         )}
       </div>
       {!currentEverestVersion && (
-        <div className="manual-everest-version" onClick={showManualVersionPopup}>
+        <div className="manual-everest-version" onClick={showManualVersionAlert}>
           {t('我已安装 Everest，但未显示')}
         </div>
       )}
