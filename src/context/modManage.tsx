@@ -1,10 +1,9 @@
 import { callRemote } from '../utils'
 import { useInstalledMods, useGamePath, useStorage, initGamePath, initModComments } from '../states'
-import { useEffect, useContext } from 'react'
-import { createPopup, PopupContext } from 'src/components/Popup'
-import { Button } from 'src/components/Button'
+import { useEffect } from 'react'
 import { toast } from '@heroui/react'
 import { useTranslation } from 'react-i18next'
+import { useAlert } from 'src/components/alert'
 
 let lastGamePath = ''
 export const createModManageContext = () => {
@@ -26,6 +25,8 @@ export const createModManageContext = () => {
 
   initGamePath()
 
+  const alert = useAlert()
+
   const ctx = {
     reloadMods: async () => {
       if (!gamePath) {
@@ -45,34 +46,25 @@ export const createModManageContext = () => {
         )) as string[]
         if (invalidFiles.length === 0) return
 
-        createPopup(() => {
-          const { hide } = useContext(PopupContext)
-
-          return (
-            <div className="popup-content">
-              <div className="title">{t('发现无效 Mod 压缩包')}</div>
-              <div className="content">
-                <p>{t('以下文件不是有效的 zip，继续保留可能导致游戏崩溃：')}</p>
-                <p>{invalidFiles.join(', ')}</p>
-              </div>
-              <div className="buttons">
-                <Button onClick={hide}>{t('暂不处理')}</Button>
-                <Button
-                  onClick={async () => {
-                    try {
-                      await callRemote('delete_mod_files', gamePath + '/Mods', invalidFiles)
-                      await ctx.reloadMods()
-                    } catch (e) {
-                      console.error('Failed to delete files:', e)
-                    }
-                    hide()
-                  }}
-                >
-                  {t('删除这些文件')}
-                </Button>
-              </div>
-            </div>
-          )
+        alert({
+          status: 'warning',
+          title: t('发现无效 Mod 压缩包'),
+          message: (
+            <>
+              <p>{t('以下文件不是有效的 zip，继续保留可能导致游戏崩溃：')}</p>
+              <p>{invalidFiles.join(', ')}</p>
+            </>
+          ),
+          cancelText: t('暂不处理'),
+          okText: t('删除这些文件'),
+          onOk: async () => {
+            try {
+              await callRemote('delete_mod_files', gamePath + '/Mods', invalidFiles)
+              await ctx.reloadMods()
+            } catch (e) {
+              console.error('Failed to delete files:', e)
+            }
+          },
         })
       } catch (e) {
         console.error('Failed to check invalid zip mods:', e)
