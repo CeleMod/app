@@ -3,11 +3,13 @@ import { Icon } from '../components/Icon'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useGamePath } from 'src/states'
 import { DownloadListPopover } from './DownloadList'
+import { useGlobalContext } from 'src/App'
 
 export function NavSidebar() {
   const { t, i18n } = useTranslation()
   const location = useLocation()
   const [gamePath] = useGamePath()
+  const { modManage } = useGlobalContext()
 
   const currentLang = i18n.language
 
@@ -42,6 +44,7 @@ export function NavSidebar() {
             title={t('管理')}
             path="/manage"
             currentPath={location.pathname}
+            isLoading={modManage.isLoading}
           />
           {currentLang === 'zh-CN' && (
             <SidebarButton
@@ -76,7 +79,7 @@ export function NavSidebar() {
   )
 }
 
-function SidebarButton({ icon, name, title, path, currentPath }: any) {
+function SidebarButton({ icon, name, title, path, currentPath, isLoading }: any) {
   const navigate = useNavigate()
   const isSelected = path === currentPath || (currentPath === '/' && path === '/')
 
@@ -87,6 +90,7 @@ function SidebarButton({ icon, name, title, path, currentPath }: any) {
     >
       <Icon name={icon} />
       <span className="text-sm">{title || name}</span>
+      {isLoading && <Icon name="loader" />}
     </button>
   )
 }
