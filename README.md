@@ -1,14 +1,28 @@
 [English](./README.en.md)
 
-在[原仓库](https://github.com/std-microblock/CeleMod)的基础上针对 macOS 端做了修复，改用了新的 UI ，也改用了新的后端方式(Tauri v2)，几乎全程 Claude Code+DeepSeek ，UI 修复大多为人工来改。目前可用，但仍有一些下列已知的问题，没意外的话应该**不会修**了。
+在[原仓库](https://github.com/std-microblock/CeleMod)的基础上针对 macOS 端做了修复，改用了新的 UI ，也改用了新的后端方式(Tauri v2)，几乎全程 Claude Code+DeepSeek ，UI 修复大多为人工来改。
 
-- 主页功能
+以前想用 CeleMod 的时候打不开，后来更新过能打开但是界面点击又没有反应，所以这次修复只是**一时兴起**，并且主要目的是让 macOS 端能跑起来，目前能够做的事情是：
+
+- 开游戏
+- 创建和切换不同的 Profile
+- 搜索和下载 mod
+- 开启、禁用、删除 mod
+
+下列已知的问题，同时可能会有很多潜在的问题没有发现，**也不打算修复** ，有需求可自行使用 AI 接着完善：
+
 - Everest 功能，**建议直接使用 Olympus 来操作**。因为这个页面样式没有修复，点击安装不会实时提供安装进度情况，实际上到最后仍然会安装成功的。
 - 管理功能
-  - Mod 列表删除按钮没有交互反馈
-  - Mod 排序按钮没有交互反馈
+  - Mod 列表
+    - 检查 mod 没用过也没测试过
+    - ☑️ 里的所有功能也没试过
+    - mods 树样式缺失，但开启关闭功能正常
+    - 删除按钮没有交互反馈
+  - Mod 排序
+    - 按钮没有交互反馈
+- 联机相关功能，联机 mod 建议进群自行下载联机 mod 并丢进 mod 文件夹
 
-下载： [Github](https://github.com/celemod/celemod/releases/latest) · [夸克(xAcy)](https://pan.quark.cn/s/20d8fcca281e)
+下载： [Github](https://github.com/celemod/celemod-macos/releases/latest) · [夸克(xAcy)](https://pan.quark.cn/s/20d8fcca281e)
 
 打不开可以尝试使用终端app输入以下内容并回车。
 
