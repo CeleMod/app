@@ -9,10 +9,10 @@ use std::{
     io::{BufRead, BufReader, Write},
     path::{Path, PathBuf},
     process::{Command, Stdio},
-    sync::{atomic::AtomicBool, Arc},
+    sync::{atomic::AtomicBool, Arc, Mutex},
 };
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct ModInfoCached {
     pub name: String,
@@ -22,36 +22,53 @@ pub struct ModInfoCached {
     pub download_url: String,
 }
 
-static USING_CACHE: AtomicBool = AtomicBool::new(false);
+pub fn get_mod_cached_new() -> anyhow::Result<Arc<HashMap<String, ModInfoCached>>> {
+    // Check if already initialized in static
+    if let Some(cached) = MOD_INFO_CACHED.lock().unwrap().as_ref() {
+        return Ok(Arc::clone(cached));
+    }
 
-pub fn is_using_cache() -> bool {
-    USING_CACHE.load(std::sync::atomic::Ordering::Relaxed)
+    // Try disk cache first — instant, no network
+    if let Some(cached) = load_mod_cache() {
+        let map: HashMap<String, ModInfoCached> =
+            cached.into_iter().map(|v| (v.name.clone(), v)).collect();
+        let arc = Arc::new(map);
+        *MOD_INFO_CACHED.lock().unwrap() = Some(Arc::clone(&arc));
+        println!("Using cached mod list (background refresh active)");
+
+        // Spawn background fetch — updates cache silently when network responds
+        std::thread::spawn(|| {
+            if let Ok(fetched) = get_mod_online_wegfan() {
+                let map: HashMap<String, ModInfoCached> =
+                    fetched.into_iter().map(|v| (v.name.clone(), v)).collect();
+                save_mod_cache_from_map(&map);
+                *MOD_INFO_CACHED.lock().unwrap() = Some(Arc::new(map));
+            }
+        });
+
+        return Ok(arc);
+    }
+
+    // No disk cache at all — must fetch from network (slow first run)
+    match get_mod_online_wegfan() {
+        Ok(fetched) => {
+            let map: HashMap<String, ModInfoCached> =
+                fetched.into_iter().map(|v| (v.name.clone(), v)).collect();
+            save_mod_cache_from_map(&map);
+            let arc = Arc::new(map);
+            *MOD_INFO_CACHED.lock().unwrap() = Some(Arc::clone(&arc));
+            Ok(arc)
+        }
+        Err(e) => {
+            eprintln!("Failed to fetch mod list: {}", e);
+            Ok(Arc::new(HashMap::new()))
+        }
+    }
 }
 
 lazy_static! {
-    static ref MOD_INFO_CACHED: Arc<HashMap<String, ModInfoCached>> = {
-        let mods = match get_mod_online_wegfan() {
-            Ok(fetched) => {
-                save_mod_cache(&fetched);
-                USING_CACHE.store(false, std::sync::atomic::Ordering::Relaxed);
-                fetched
-            }
-            Err(e) => {
-                eprintln!("Failed to fetch mod list: {}", e);
-                if let Some(cached) = load_mod_cache() {
-                    println!("Using cached mod list");
-                    USING_CACHE.store(true, std::sync::atomic::Ordering::Relaxed);
-                    cached
-                } else {
-                    eprintln!("No cache available");
-                    USING_CACHE.store(false, std::sync::atomic::Ordering::Relaxed);
-                    vec![]
-                }
-            }
-        };
-        let mods = mods.into_iter().map(|v| (v.name.clone(), v)).collect();
-        Arc::new(mods)
-    };
+    static ref MOD_INFO_CACHED: Mutex<Option<Arc<HashMap<String, ModInfoCached>>>> =
+        Mutex::new(None);
 }
 
 fn load_mod_cache() -> Option<Vec<ModInfoCached>> {
@@ -77,6 +94,11 @@ fn save_mod_cache(mods: &[ModInfoCached]) {
     }
 }
 
+fn save_mod_cache_from_map(map: &HashMap<String, ModInfoCached>) {
+    let mods: Vec<ModInfoCached> = map.values().cloned().collect();
+    save_mod_cache(&mods);
+}
+
 pub fn get_mod_online_wegfan() -> anyhow::Result<Vec<ModInfoCached>> {
     let mut response: serde_json::Value = get("https://celeste.weg.fan/api/v2/mod/list")
         .set(
@@ -99,10 +121,6 @@ pub fn get_mod_online_wegfan() -> anyhow::Result<Vec<ModInfoCached>> {
             })
         })
         .collect()
-}
-
-pub fn get_mod_cached_new() -> anyhow::Result<Arc<HashMap<String, ModInfoCached>>> {
-    Ok(Arc::clone(&MOD_INFO_CACHED))
 }
 
 static MAGIC_STR: &str = "EverestBuild";
